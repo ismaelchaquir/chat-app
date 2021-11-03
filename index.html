@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"  crossorigin="anonymous"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <title>Document</title>
+</head>
+<body>
+
+  <div class="container">
+
+    <br>
+    <div class="jumbotron">
+      <h1 class="display-4">send message</h1>
+      <input id="name" class="form-control" placeholder="Name">
+      <br>
+      <textarea id="message" class="form-control" placeholder="Message"></textarea>
+      <br>
+      <button id="send" class="btn btn-success">send</button>
+    </div>
+
+    <div id="messages">
+
+    </div>
+  </div>
+
+ 
+  
+  <script>
+    const socket = io("http://localhost:3000");
+
+    socket.on("msg:get",(message)=>{
+      console.log(message.message)
+    })
+
+    $(() => {
+      $("#send").click(()=>{
+        let message= { name: $("#name").val(), message: $("#message").val()}
+        postMessage(message)
+        clear()
+        
+      })
+      getMessages()
+
+      socket.on("message",addMessage)
+   
+    })
+
+    function addMessage(message){
+      $("#messages").append(`<h4>${message.name}</h4> <p>${message.message}</p>`)
+    }
+
+    function getMessages(){
+      $.get("http://localhost:3000/messages",function(data){
+         data.forEach(addMessage);
+      })
+    }
+
+    function clear(){
+      $("#name").val("")
+      $("#message").val("")
+    }
+
+    function postMessage(message){
+      $.post("http://localhost:3000/messages",message)
+    }
+  </script>
+</body>
+</html>
